@@ -1,0 +1,19 @@
+# Variables and functions to be used by all scripts in this folder
+
+container_image=dock_openvpn
+container_name=openvpn
+container_port=1194
+external_port=${container_port}
+
+clients_folder=${PWD}/clients
+easyrsa=/usr/share/easy-rsa/easyrsa # Debian installation folder for rsa
+easyrsa_folder=${PWD}/easyrsa_keys
+commonclient_file=${PWD}/client-common.txt
+
+run_container() {
+    docker run --device /dev/net/tun:/dev/net/tun -p ${external_port}:${container_port}/udp --cap-add NET_ADMIN -dt --name ${container_name}  ${container_image}
+}
+
+create_container() {
+    docker build -t "${container_image}:latest" .
+}
