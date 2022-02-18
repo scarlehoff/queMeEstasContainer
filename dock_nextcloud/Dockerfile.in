@@ -1,0 +1,11 @@
+FROM nextcloud
+MAINTAINER juacrumar juacrumar@lairen.eu
+
+# Define the environment variables
+ENV OVERWRITEWEBROOT=CUSTOMWEBROOT
+ENV OVERWRITEHOST=CUSTOMHOST
+ENV OVERWRITEPROTOCOL=https
+
+# Copy inside our specific apache config
+#COPY apache.conf /etc/apache2/sites-available/000-default.conf
+#COPY apache-pretty-urls.config.php /usr/src/nextcloud/config/
