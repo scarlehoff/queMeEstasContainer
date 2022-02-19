@@ -1,10 +1,18 @@
 FROM nextcloud
 MAINTAINER juacrumar juacrumar@lairen.eu
 
+RUN apt-get update ; apt-get install -y sudo cron vim ; apt-get -y clean ; apt-get -y autoclean ; apt-get -y autoremove
+
 # Define the environment variables
 ENV OVERWRITEWEBROOT=CUSTOMWEBROOT
 ENV OVERWRITEHOST=CUSTOMHOST
 ENV OVERWRITEPROTOCOL=https
+ENV NEXTCLOUD_UPDATE=1
+ENV PHP_MEMORY_LIMIT=512M
+
+# Make sure that the crontab for www-data is calling cron.php
+# https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/background_jobs_configuration.html#cron
+RUN (echo "*/5 * * * * PHP_MEMORY_LIMIT=512M php -f /var/www/html/cron.php") | crontab -u www-data -
 
 # Copy inside our specific apache config
 #COPY apache.conf /etc/apache2/sites-available/000-default.conf
