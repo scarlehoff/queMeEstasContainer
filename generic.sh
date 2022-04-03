@@ -1,5 +1,9 @@
 # some generic functions that are common for everyone
 
+docker_logs () {
+    docker logs ${1} -f
+}
+
 docker_clean_container() {
     docker container rm ${1}
 }

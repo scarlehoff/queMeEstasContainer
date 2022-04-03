@@ -3,6 +3,7 @@
 source ../generic.sh
 
 IMAGE_NAME=dock_radicale
+CONT_NAME=test_radicale
 DATA_FOLDER=${PWD}/radicale_data
 PORT=5467
 
@@ -10,7 +11,7 @@ PORT=5467
 create_ssl() {
     echo "Installing certbot"
     sudo apt install python3-certbot
-    sudo certbot
+    sudo certbot certonly
 }
 
 renew_ssl() {
@@ -44,18 +45,20 @@ usage() {
     echo "    -c remove test container and image"
     echo "    -b build the docker image"
     echo "    -r run docker image"
+    echo "    -l see logs"
 }
 
 while getopts 'fcsnu:br' flag
 do
     case "${flag}" in
-        c) docker_full_clean ${IMAGE_NAME} test_radicale ;;
+        c) docker_full_clean ${IMAGE_NAME} ${CONT_NAME} ;;
         s) create_ssl ;;
         n) renew_ssl ;;
         f) prepare_folder ;;
         u) create_user ${OPTARG} ;;
         b) docker_build ${IMAGE_NAME} ;;
-        r) docker_run ${IMAGE_NAME} test_radicale -p $PORT -v ${DATA_FOLDER}:/mnt -i /bin/sh ;;
+        r) docker_run ${IMAGE_NAME} ${CONT_NAME} -p $PORT -v ${DATA_FOLDER}:/mnt ;; #-i /bin/sh ;;
+        l) docker_logs ${CONT_NAME} ;;
         *) usage
             exit 1 ;;
     esac
