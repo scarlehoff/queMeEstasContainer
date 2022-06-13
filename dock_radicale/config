@@ -1,0 +1,17 @@
+[auth]
+type = htpasswd
+htpasswd_filename = /mnt/users
+htpasswd_encryption = md5
+
+[server]
+hosts = 0.0.0.0:5467, [::]:5467
+ssl = True
+certificate = /mnt/fullchain.pem
+key = /mnt/privkey.pem
+timeout = 3000
+
+[storage]
+filesystem_folder = /mnt/calendars
+ 
+[rights]
+type = authenticated
