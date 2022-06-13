@@ -14,7 +14,9 @@ docker_full_clean() {
 }
 
 docker_build() {
-    docker build -t "$1:latest" .
+    image_name=${1}
+    shift
+    docker build --force-rm -t "${image_name}:latest" . $@
 }
 
 docker_run() {
