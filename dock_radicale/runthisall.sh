@@ -48,7 +48,7 @@ usage() {
     echo "    -l see logs"
 }
 
-while getopts 'fcsnu:br' flag
+while getopts 'fcsnu:brl' flag
 do
     case "${flag}" in
         c) docker_full_clean ${IMAGE_NAME} ${CONT_NAME} ;;
@@ -57,7 +57,7 @@ do
         f) prepare_folder ;;
         u) create_user ${OPTARG} ;;
         b) docker_build ${IMAGE_NAME} ;;
-        r) docker_run ${IMAGE_NAME} ${CONT_NAME} -p $PORT -v ${DATA_FOLDER}:/mnt ;; #-i /bin/sh ;;
+        r) docker_run ${IMAGE_NAME} ${CONT_NAME} -p $PORT -v ${DATA_FOLDER}:/mnt ;; # -i /bin/sh ;;
         l) docker_logs ${CONT_NAME} ;;
         *) usage
             exit 1 ;;
