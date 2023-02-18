@@ -11,6 +11,10 @@ To get all of this up and running:
 
 It is necessary to install easy-rsa beforehand!
 
+
+Ok, the first step is to copy client-common.txt.in into client-common.txt, changing the appropiate variables.
+Then we can run the following commands:
+
 ```bash
 ./easy_crypto.sh
 ./new_client.sh DentArthur

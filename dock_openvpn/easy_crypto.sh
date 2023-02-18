@@ -12,6 +12,8 @@ then
     cp client-common.txt.in client-common.txt
 fi
 
+cn_name=$(cat client-common.txt | grep x509 | cut -d ' ' -f 2)
+
 mkdir -p ${easyrsa_folder}
 
 cd ${easyrsa_folder}
@@ -20,12 +22,15 @@ ${easyrsa} --batch build-ca nopass
 
 export EASYRSA_CERT_EXPIRE=3650
 export EASYRSA_CRL_DAYS=3650
-${easyrsa} build-server-full server nopass
+# The CN here shoud match the name in client-common.txt
+${easyrsa} build-server-full ${cn_name} nopass
 ${easyrsa} gen-crl
 sudo openvpn --genkey secret tc.key
 sudo chown $USER tc.key
 
-openssl dhparam -out dh.pem 4096 # we could also go down to 2048
+openssl dhparam -out dh.pem 2048 # we could also go down to 2048
 
-cp pki/ca.crt pki/private/ca.key pki/issued/server.crt pki/private/server.key pki/crl.pem ${easyrsa_folder}
+cp pki/issued/${cn_name}.crt ${easyrsa_folder}/server.crt
+cp pki/private/${cn_name}.key ${easyrsa_folder}/server.key
+cp pki/ca.crt pki/private/ca.key pki/crl.pem ${easyrsa_folder}
 cd -
