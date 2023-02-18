@@ -7,6 +7,11 @@ if [ -d ${easyrsa_folder} ]; then
     echo "sudo rm -rf ${easyrsa_folder}"
 fi
 
+if [ ! -f ./client-common.txt.in ]
+then
+    cp client-common.txt.in client-common.txt
+fi
+
 mkdir -p ${easyrsa_folder}
 
 cd ${easyrsa_folder}
