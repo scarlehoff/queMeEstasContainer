@@ -23,3 +23,4 @@ sudo chown $USER tc.key
 openssl dhparam -out dh.pem 4096 # we could also go down to 2048
 
 cp pki/ca.crt pki/private/ca.key pki/issued/server.crt pki/private/server.key pki/crl.pem ${easyrsa_folder}
+cd -

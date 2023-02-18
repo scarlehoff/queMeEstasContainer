@@ -1,12 +1,20 @@
 # Variables and functions to be used by all scripts in this folder
 
+source ../generic.sh
+
 container_image=dock_openvpn
 container_name=openvpn
 container_port=1194
 external_port=${container_port}
 
 clients_folder=${PWD}/clients
-easyrsa=/usr/share/easy-rsa/easyrsa # Debian installation folder for rsa
+
+easyrsa=easyrsa
+
+if ! [ -x "$(command -v easyrsa)" ]; then
+	easyrsa=/usr/share/easy-rsa/easyrsa # Debian installation folder for rsa
+fi
+
 easyrsa_folder=${PWD}/easyrsa_keys
 commonclient_file=${PWD}/client-common.txt
 
@@ -15,5 +23,5 @@ run_container() {
 }
 
 create_container() {
-    docker build -t "${container_image}:latest" .
+    docker_build ${container_image}
 }

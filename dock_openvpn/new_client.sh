@@ -1,5 +1,5 @@
 #!/bin/sh
-source sh_variables
+. ./sh_variables
 
 # Usage: ./new_client.sh <client_name>
 # Create configurations files for new clients

@@ -9,6 +9,8 @@ To get all of this up and running:
 3. Build the docker file
 4. Run said docker file
 
+It is necessary to install easy-rsa beforehand!
+
 ```bash
 ./easy_crypto.sh
 ./new_client.sh DentArthur
