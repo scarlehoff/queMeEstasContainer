@@ -16,7 +16,7 @@ docker_full_clean() {
 docker_build() {
     image_name=${1}
     shift
-    docker build --force-rm -t "${image_name}:latest" . $@
+    docker buildx build --force-rm -t "${image_name}:latest" . $@
 }
 
 docker_run() {

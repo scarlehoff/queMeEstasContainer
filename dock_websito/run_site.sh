@@ -1,3 +1,5 @@
 #!/bin/bash
 
-docker run -p 3000:3000 -dt --name websito_test dock_websito
+source ./websito_vars.sh
+
+docker run -p 3000:3000 --mount type=bind,source=${repo_name},target=/websito -dt --name ${container_name} ${image_name}
