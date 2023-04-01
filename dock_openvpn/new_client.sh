@@ -1,8 +1,12 @@
 #!/bin/sh
 . ./sh_variables
 
-# Usage: ./new_client.sh <client_name>
-# Create configurations files for new clients
+if [[ $# -ne 1 ]]
+then
+    echo "Usage: ./new_client.sh <client_name>"
+    echo "Create configurations files for new clients"
+    exit
+fi
 
 client=$1
 
