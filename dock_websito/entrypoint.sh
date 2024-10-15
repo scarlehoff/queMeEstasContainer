@@ -12,6 +12,7 @@ then
     # Check whether we don't already have node-modules
     if [ ! -d node_modules ]
     then
+        echo "Installing modules"
         npm i
     fi
 

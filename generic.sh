@@ -38,3 +38,8 @@ docker_run() {
 
     docker run $ports $volume ${mode} --name ${container_name} ${image_name}:latest ${executable}
 }
+
+docker_interactive() {
+    # Start interactively docker image ${1}
+    docker run -it --entrypoint /bin/sh ${1}
+}
