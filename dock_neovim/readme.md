@@ -1,0 +1,1 @@
+This container is a bit different from all the others, in that the goal is to use Apple's containers: https://github.com/apple/container to isolate `neovim` and all of their plugins from the rest of the system.
