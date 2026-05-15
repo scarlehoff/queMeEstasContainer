@@ -1,6 +1,5 @@
 FROM debian:trixie-slim
 
-
 ARG NVIM_URL=https://github.com/neovim/neovim/releases/latest/download/nvim-linux-arm64.tar.gz
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -27,14 +26,7 @@ RUN curl -L "$NVIM_URL" -o /tmp/nvim.tar.gz \
     && ln -s /opt/nvim-linux-arm64/bin/nvim /usr/local/bin/nvim \
     && rm /tmp/nvim.tar.gz
 
-RUN useradd -m -s /bin/bash juacrumar \
-    && install -d -o juacrumar -g juacrumar \
-        /home/juacrumar/.config/nvim \
-        /home/juacrumar/.local \
-        /home/juacrumar/.local/bin \
-        /home/juacrumar/.local/share \
-        /home/juacrumar/.local/state \
-        /home/juacrumar/.cache
+RUN useradd -m -s /bin/bash juacrumar 
 
 COPY --chown=juacrumar:juacrumar ./nvim_config/ /home/juacrumar/.config/nvim/
 COPY --chown=juacrumar:juacrumar ./vim/ /home/juacrumar/.vim
@@ -48,4 +40,12 @@ ENV XDG_DATA_HOME=/home/juacrumar/.local/share
 ENV XDG_STATE_HOME=/home/juacrumar/.local/state
 ENV XDG_CACHE_HOME=/home/juacrumar/.cache
 
-CMD ["bash"]
+RUN nvim --headless \
+    "+PlugInstall --sync" \
+    "+PlugUpdate --sync" \
+    "+source ~/.config/nvim/init.lua" \
+    "+MasonInstall pyright esbonio emmet-language-server eslint-lsp bash-language-server" \
+    "+sleep 120" \
+    +qa
+
+CMD ["nvim"]
