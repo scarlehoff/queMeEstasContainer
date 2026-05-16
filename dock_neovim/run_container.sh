@@ -40,4 +40,4 @@ container run --rm -it \
   --network none \
   --volume "$MOUNT_ROOT:$MOUNT_ROOT" \
   --workdir "$HOST_PWD" \
-  nvim-alpine-arm64 nvim "$@"
+  nvim-debian-arm64 nvim "$@"

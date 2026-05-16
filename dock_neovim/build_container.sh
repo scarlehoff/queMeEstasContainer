@@ -10,4 +10,4 @@ cp -RL "$HOME/.vim/"  vim
 
 container build \
   --platform linux/arm64 \
-  -t nvim-alpine-arm64
+  -t nvim-debian-arm64
