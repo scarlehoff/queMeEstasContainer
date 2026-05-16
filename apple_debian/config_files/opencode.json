@@ -1,0 +1,30 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "enabled_providers": ["omlx"],
+    "model": "omlx/gemma-4-31b-it-8bit",
+    "small_model": "omlx/gemma-4-31b-it-8bit",
+    "provider": {
+        "omlx": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "OMLX",
+            "options": {
+                "baseURL": "{env:OMLX_BASE_URL}",
+                "apiKey": "{env:OMLX_API_KEY}"
+            },
+            "models": {
+                "gemma-4-31b-it-8bit" : {
+                    "name": "Gemma 4 8bit (32GB)"
+                },
+                "Qwen3.6-35B-A3B-4bit": {
+                    "name": "Qwen3.6 35B A3B 4-bit"
+                },
+                "gemma-4-31b-it-bf16" : {
+                    "name": "Gemma 4 16bit (72GB)"
+                },
+                "gemma-4-e2b-it-4bit" : {
+                    "name": "Gemma 4 4bit (3.5GB)"
+                }
+            }
+        }
+    }
+}
