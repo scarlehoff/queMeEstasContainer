@@ -4,9 +4,11 @@ FROM debian:trixie-slim
 ARG NVIM_URL=https://github.com/neovim/neovim/releases/latest/download/nvim-linux-arm64.tar.gz
 ARG USERNAME=juacrumar
 ARG STATE_VOLUME=/state_volume
+ARG PIXI_VOLUME=/pixi_volume
 
 ENV USERNAME=${USERNAME}
 ENV STATE_VOLUME=${STATE_VOLUME}
+ENV PIXI_VOLUME=${PIXI_VOLUME}
 
 # Install what we can from apt
 #     procps: API to read from /proc
@@ -49,6 +51,11 @@ RUN curl -L "$NVIM_URL" -o /tmp/nvim.tar.gz \
 # codex & opencode
 RUN npm install -g @openai/codex opencode-ai
 
+# pixi
+RUN export PIXI_HOME=/opt/pixi \
+    && curl -fsSL https://pixi.sh/install.sh | sh \
+    && ln -s /opt/pixi/bin/pixi /usr/local/bin/pixi
+
 # User for the container 
 RUN useradd -U -m -s /bin/bash $USERNAME \
     && mkdir -p "/home/${USERNAME}/.config" \
@@ -90,6 +97,9 @@ WORKDIR /work
 # codex will be saving all its state, aut, etc to $CODEX_HOME
 # make sure that's pointing to the mounted volume
 ENV CODEX_HOME=${STATE_VOLUME}/codex
+
+# pixi does something similar
+ENV PIXI_HOME=${PIXI_VOLUME}/dot_pixi
 
 ENV HOME=/home/$USERNAME
 ENV XDG_CONFIG_HOME=/home/$USERNAME/.config

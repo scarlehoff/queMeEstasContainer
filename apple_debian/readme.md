@@ -39,6 +39,17 @@ Otherwise, it mounts the enclosing git repository root.
 ## State
 
 Persistent tool state lives in the `debian-apple-state` volume mounted at `/state_volume`.
-The python environments are defined using pixi, with the environments prepared in the `pixi-state` (`/pixi_volume`) volume.
-If a repository (for instance nnpdf) has a matching `/pixi_volume/<repo_name>` folder, the container will run `pixi shell` first thing.
+Pixi state lives in the `pixi-state` volume mounted at `/pixi_volume`, with
+`PIXI_HOME=/pixi_volume/dot_pixi`.
 
+Per-repository pixi projects go under:
+
+```text
+/pixi_volume/repository_environments/<repo_name>/pixi.toml
+```
+
+When the container starts, the entrypoint walks upward from the current
+directory and looks for a matching pixi project by folder name.
+If a matching `pixi.toml` exists, the entrypoint activates it with
+`pixi shell-hook`, returns to the original working directory, and runs the
+requested command. If no matching `pixi.toml` exists, startup behaves normally.

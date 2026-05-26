@@ -16,6 +16,8 @@ MAIN_DISK=/Volumes/csDisk/
 IMAGE=debian-apple-juacrumar
 STATE_VOLUME_NAME=debian-apple-state
 STATE_VOLUME_PATH=/state_volume
+PIXI_VOLUME_NAME=pixi-state
+PIXI_VOLUME_PATH=/pixi_volume
 
 # Take the actual path (symlinks resolved)
 HOST_PWD=$(pwd -P)
@@ -39,12 +41,15 @@ esac
 # Check whether the volume saving the state already exist, if it doesn't, create it
 container volume inspect "${STATE_VOLUME_NAME}" >/dev/null 2>&1 \
   || container volume create "${STATE_VOLUME_NAME}" >/dev/null
+container volume inspect "${PIXI_VOLUME_NAME}" >/dev/null 2>&1 \
+  || container volume create "${PIXI_VOLUME_NAME}" >/dev/null
 
 # Then, we mount MOUNT_ROOT and we set the working directory as HOST_PWD
 # so that we are at the "right place"
 container run --rm -it \
     --name containDev \
     --volume "${STATE_VOLUME_NAME}:${STATE_VOLUME_PATH}" \
+    --volume "${PIXI_VOLUME_NAME}:${PIXI_VOLUME_PATH}" \
     --mount type=bind,src="${MOUNT_ROOT}",dst="${MOUNT_ROOT}" \
     --workdir "$HOST_PWD" \
     -e OMLX_BASE_URL="${OMLX_BASE_URL:-}" \
