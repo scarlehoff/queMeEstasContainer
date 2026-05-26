@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ripgrep \
     tar \
     tesseract-ocr \
+    tmux \
     tree-sitter-cli \
     vim-tiny \
     unzip \
@@ -73,6 +74,9 @@ RUN useradd -U -m -s /bin/bash $USERNAME \
 #   - vim: ~/.vim
 COPY --chown=$USERNAME:$USERNAME ./nvim_config/ /home/$USERNAME/.config/nvim/
 COPY --chown=$USERNAME:$USERNAME ./vim/ /home/$USERNAME/.vim
+
+# tmux
+COPY --chown=$USERNAME:$USERNAME ./tmux_config/ /home/$USERNAME/.config/tmux
 
 # codex 
 # no config needed, everything will be under ${CODEX_HOME} in the mounted volume
