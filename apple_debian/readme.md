@@ -23,6 +23,12 @@ Start an interactive shell with:
 ./run_container.sh
 ```
 
+If this is launched from a normal terminal, the container starts a `tmux`
+session automatically. If the host is already inside `tmux`, it starts a plain
+shell instead. The image defaults to a UTF-8 locale and truecolor terminal
+settings, and the run script passes through the host terminal type, so Neovim
+icons render correctly.
+
 or some specific tool directly, like `codex` or `opencode`.
 
 ```bash
@@ -30,6 +36,8 @@ or some specific tool directly, like `codex` or `opencode`.
 ./run_container.sh opencode
 ./run_container.sh nvim .
 ```
+
+Direct commands are not wrapped in `tmux`.
 
 The run script mounts the current working area into the container and sets the
 container working directory to the same path. If the current directory is under

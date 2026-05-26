@@ -18,6 +18,7 @@ STATE_VOLUME_NAME=debian-apple-state
 STATE_VOLUME_PATH=/state_volume
 PIXI_VOLUME_NAME=pixi-state
 PIXI_VOLUME_PATH=/pixi_volume
+NNPDF_DATA_PATH=/nnpdf_data
 
 # Take the actual path (symlinks resolved)
 HOST_PWD=$(pwd -P)
@@ -51,7 +52,11 @@ container run --rm -it \
     --volume "${STATE_VOLUME_NAME}:${STATE_VOLUME_PATH}" \
     --volume "${PIXI_VOLUME_NAME}:${PIXI_VOLUME_PATH}" \
     --mount type=bind,src="${MOUNT_ROOT}",dst="${MOUNT_ROOT}" \
+    --mount type=bind,src="~/.local/share/NNPDF",dst="${NNPDF_DATA_PATH}" \
     --workdir "$HOST_PWD" \
+    -e HOST_TMUX="${TMUX:-}" \
+    -e TERM="${TERM:-xterm-256color}" \
+    -e COLORTERM="${COLORTERM:-truecolor}" \
     -e OMLX_BASE_URL="${OMLX_BASE_URL:-}" \
     -e OMLX_API_KEY="${OMLX_API_KEY:-1234}" \
     ${IMAGE} "$@"

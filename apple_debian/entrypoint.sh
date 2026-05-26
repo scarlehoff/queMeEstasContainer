@@ -10,7 +10,6 @@ OPENCODE_CONFIG="${STATE_VOLUME}/opencode/config/opencode/opencode.json"
 WORKDIR="$PWD"
 
 # Keep tool state in the mounted volume, then run the requested command as USERNAME.
-
 if ! mountpoint -q "$STATE_VOLUME"; then
     echo "FATAL: Volume not mounted at $STATE_VOLUME. Exiting..." >&2
     exit 1
@@ -41,17 +40,39 @@ if [[ -z "${OMLX_BASE_URL:-}" ]]; then
   export OMLX_BASE_URL="http://${OMLX_HOST}:${PORT}/v1"
 fi
 
+setpriv --reuid="$USERNAME" --regid="$USERNAME" --init-groups \
+  opencode-refresh-models "$OPENCODE_CONFIG"
+
 export HOME="/home/${USERNAME}"
 export USER="$USERNAME"
 export LOGNAME="$USERNAME"
 export SHELL=/bin/bash
-export TERM="${TERM:-xterm-256color}"
+export LANG="${LANG:-C.UTF-8}"
+export LC_CTYPE="${LC_CTYPE:-C.UTF-8}"
+export COLORTERM="${COLORTERM:-truecolor}"
+case "${TERM:-}" in
+  ""|xterm) export TERM=xterm-256color ;;
+  *) export TERM ;;
+esac
 export PIXI_HOME
 
-setpriv --reuid="$USERNAME" --regid="$USERNAME" --init-groups \
-  opencode-refresh-models "$OPENCODE_CONFIG"
+# Act differently depending on whether
+# a) We gave a direct command to entrypoint.sh
+# b) We are running under TMUX in the host
+# c) We are running "free range" in a terminal
+if [[ "$#" -eq 0 ]]; then
+  cmd=(bash)
+else
+  cmd=("$@")
+fi
 
-# Try to figure out whether we have a pixi environment already for this repository
+if [[ "${#cmd[@]}" -eq 1 && -z "${HOST_TMUX:-}" && -z "${TMUX:-}" && -t 0 && -t 1 ]]; then
+  case "${cmd[0]}" in
+    bash|/bin/bash) cmd=(tmux -u -2 new-session -A -s dev) ;;
+  esac
+fi
+
+# Finally, try to figure out whether we have a pixi environment already for this repository
 pixi_toml=""
 dir="$WORKDIR"
 while [[ "$dir" != "/" ]]; do
@@ -70,7 +91,7 @@ done
 if [[ -n "$pixi_toml" ]]; then
   exec setpriv --reuid="$USERNAME" --regid="$USERNAME" --init-groups \
     bash -c 'set -e; hook="$(pixi shell-hook --manifest-path "$1")"; eval "$hook"; export debian_chroot="${PIXI_PROJECT_NAME:-pixi}"; cd "$2"; shift 2; exec "$@"' \
-    pixi-entrypoint "$pixi_toml" "$WORKDIR" "$@"
+    pixi-entrypoint "$pixi_toml" "$WORKDIR" "${cmd[@]}"
 fi
 
-exec setpriv --reuid="$USERNAME" --regid="$USERNAME" --init-groups "$@"
+exec setpriv --reuid="$USERNAME" --regid="$USERNAME" --init-groups "${cmd[@]}"

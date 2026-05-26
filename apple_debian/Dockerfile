@@ -5,10 +5,15 @@ ARG NVIM_URL=https://github.com/neovim/neovim/releases/latest/download/nvim-linu
 ARG USERNAME=juacrumar
 ARG STATE_VOLUME=/state_volume
 ARG PIXI_VOLUME=/pixi_volume
+ARG NNPDF_DATA=/nnpdf_data
 
 ENV USERNAME=${USERNAME}
 ENV STATE_VOLUME=${STATE_VOLUME}
 ENV PIXI_VOLUME=${PIXI_VOLUME}
+ENV LANG=C.UTF-8
+ENV LC_CTYPE=C.UTF-8
+ENV COLORTERM=truecolor
+ENV TERM=xterm-256color
 
 # Install what we can from apt
 #     procps: API to read from /proc
@@ -78,6 +83,10 @@ COPY --chown=$USERNAME:$USERNAME ./vim/ /home/$USERNAME/.vim
 # tmux
 COPY --chown=$USERNAME:$USERNAME ./tmux_config/ /home/$USERNAME/.config/tmux
 
+# nnpdf
+COPY --chown=$USERNAME:$USERNAME ./config_files/nnprofile.yaml /home/$USERNAME/.config/NNPDF/nnprofile.yaml
+RUN mkdir -p ${NNPDF_DATA}
+
 # codex 
 # no config needed, everything will be under ${CODEX_HOME} in the mounted volume
 
@@ -93,7 +102,7 @@ RUN ln -s ${STATE_VOLUME}/opencode/config/opencode "/home/${USERNAME}/.config/op
  && chmod +x /usr/local/bin/opencode-refresh-models
 
 # Set up permissions
-RUN chown -R "${USERNAME}:${USERNAME}" "/home/${USERNAME}"
+RUN chown -R "${USERNAME}:${USERNAME}" "/home/${USERNAME}" ${NNPDF_DATA}
 
 USER $USERNAME
 WORKDIR /work
