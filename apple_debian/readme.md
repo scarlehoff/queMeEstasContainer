@@ -25,9 +25,8 @@ Start an interactive shell with:
 
 If this is launched from a normal terminal, the container starts a `tmux`
 session automatically. If the host is already inside `tmux`, it starts a plain
-shell instead. The image defaults to a UTF-8 locale and truecolor terminal
-settings, and the run script passes through the host terminal type, so Neovim
-icons render correctly.
+shell instead. The image defaults to a UTF-8 locale and `xterm-256color`, so
+Neovim icons render correctly.
 
 or some specific tool directly, like `codex` or `opencode`.
 
@@ -38,6 +37,13 @@ or some specific tool directly, like `codex` or `opencode`.
 ```
 
 Direct commands are not wrapped in `tmux`.
+
+The run script starts the container with 4 CPUs and 4 GB of memory by default.
+Override that when needed:
+
+```bash
+CONTAINER_MEMORY=8G CONTAINER_CPUS=6 ./run_container.sh
+```
 
 The run script mounts the current working area into the container and sets the
 container working directory to the same path. If the current directory is under
@@ -60,4 +66,6 @@ When the container starts, the entrypoint walks upward from the current
 directory and looks for a matching pixi project by folder name.
 If a matching `pixi.toml` exists, the entrypoint activates it with
 `pixi shell-hook`, returns to the original working directory, and runs the
-requested command. If no matching `pixi.toml` exists, startup behaves normally.
+requested command. In the auto-started tmux session, panes start with `bash`
+so the pixi `PATH` is preserved. If no matching `pixi.toml` exists, startup
+behaves normally.

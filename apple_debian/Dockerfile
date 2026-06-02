@@ -11,8 +11,6 @@ ENV USERNAME=${USERNAME}
 ENV STATE_VOLUME=${STATE_VOLUME}
 ENV PIXI_VOLUME=${PIXI_VOLUME}
 ENV LANG=C.UTF-8
-ENV LC_CTYPE=C.UTF-8
-ENV COLORTERM=truecolor
 ENV TERM=xterm-256color
 
 # Install what we can from apt
@@ -64,7 +62,7 @@ RUN export PIXI_HOME=/opt/pixi \
 
 # User for the container 
 RUN useradd -U -m -s /bin/bash $USERNAME \
-    && mkdir -p "/home/${USERNAME}/.config" \
+    && install -d -o $USERNAME -g $USERNAME "/home/${USERNAME}/.config" \
                 "/home/${USERNAME}/.local/share" \
                 "/home/${USERNAME}/.local/state" \
                 "/home/${USERNAME}/.cache"
@@ -85,7 +83,7 @@ COPY --chown=$USERNAME:$USERNAME ./tmux_config/ /home/$USERNAME/.config/tmux
 
 # nnpdf
 COPY --chown=$USERNAME:$USERNAME ./config_files/nnprofile.yaml /home/$USERNAME/.config/NNPDF/nnprofile.yaml
-RUN mkdir -p ${NNPDF_DATA}
+RUN install -d -o $USERNAME -g $USERNAME ${NNPDF_DATA}
 
 # codex 
 # no config needed, everything will be under ${CODEX_HOME} in the mounted volume
@@ -101,7 +99,7 @@ RUN ln -s ${STATE_VOLUME}/opencode/config/opencode "/home/${USERNAME}/.config/op
  && ln -s ${STATE_VOLUME}/opencode/cache/opencode "/home/${USERNAME}/.cache/opencode" \
  && chmod +x /usr/local/bin/opencode-refresh-models
 
-# Set up permissions
+# Make sure permissions are ok
 RUN chown -R "${USERNAME}:${USERNAME}" "/home/${USERNAME}" ${NNPDF_DATA}
 
 USER $USERNAME

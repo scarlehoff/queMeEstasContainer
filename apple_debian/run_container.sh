@@ -12,8 +12,10 @@
 set -euo pipefail
 
 # Important variables
-MAIN_DISK=/Volumes/csDisk/
+MAIN_DISK=/Volumes/csDisk/container_root/
 IMAGE=debian-apple-juacrumar
+CONTAINER_CPUS=${CONTAINER_CPUS:-8}
+CONTAINER_MEMORY=${CONTAINER_MEMORY:-16G}
 STATE_VOLUME_NAME=debian-apple-state
 STATE_VOLUME_PATH=/state_volume
 PIXI_VOLUME_NAME=pixi-state
@@ -49,14 +51,15 @@ container volume inspect "${PIXI_VOLUME_NAME}" >/dev/null 2>&1 \
 # so that we are at the "right place"
 container run --rm -it \
     --name containDev \
+    --init \
+    --cpus "${CONTAINER_CPUS}" \
+    --memory "${CONTAINER_MEMORY}" \
     --volume "${STATE_VOLUME_NAME}:${STATE_VOLUME_PATH}" \
     --volume "${PIXI_VOLUME_NAME}:${PIXI_VOLUME_PATH}" \
     --mount type=bind,src="${MOUNT_ROOT}",dst="${MOUNT_ROOT}" \
     --mount type=bind,src="~/.local/share/NNPDF",dst="${NNPDF_DATA_PATH}" \
     --workdir "$HOST_PWD" \
     -e HOST_TMUX="${TMUX:-}" \
-    -e TERM="${TERM:-xterm-256color}" \
-    -e COLORTERM="${COLORTERM:-truecolor}" \
     -e OMLX_BASE_URL="${OMLX_BASE_URL:-}" \
     -e OMLX_API_KEY="${OMLX_API_KEY:-1234}" \
     ${IMAGE} "$@"
