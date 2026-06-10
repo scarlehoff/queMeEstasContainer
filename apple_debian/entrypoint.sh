@@ -9,6 +9,13 @@ PORT="${PORT:-11311}"
 OPENCODE_CONFIG="${STATE_VOLUME}/opencode/config/opencode/opencode.json"
 WORKDIR="$PWD"
 
+# And set some environment variables
+export HOME="/home/${USERNAME}"
+export USER="$USERNAME"
+export LOGNAME="$USERNAME"
+export SHELL=/bin/bash
+export PIXI_HOME
+
 # Check we have the volumes we need:
 for volume in "$STATE_VOLUME" "$PIXI_VOLUME"; do
     if ! mountpoint -q "$volume"; then
@@ -33,34 +40,15 @@ if [[ ! -f "$OPENCODE_CONFIG" ]]; then
 fi
 ##########################
 
-# chown "${USERNAME}:${USERNAME}" \
-#     "$STATE_VOLUME" \
-#     "${STATE_VOLUME}/codex" \
-#     "${STATE_VOLUME}/opencode" \
-#     "${STATE_VOLUME}/opencode/config" \
-#     "${STATE_VOLUME}/opencode/config/opencode" \
-#     "${STATE_VOLUME}/opencode/share" \
-#     "${STATE_VOLUME}/opencode/share/opencode" \
-#     "${STATE_VOLUME}/opencode/cache" \
-#     "${STATE_VOLUME}/opencode/cache/opencode" \
-#     "$PIXI_VOLUME" \
-#     "$PIXI_HOME" \
-#     "${PIXI_VOLUME}/repository_environments" \
-#     "$OPENCODE_CONFIG"
-
+# To make sure that opencode finds OMLX
 if [[ -z "${OMLX_BASE_URL:-}" ]]; then
     OMLX_HOST="$(awk '/^nameserver / {print $2; exit}' /etc/resolv.conf)"
     export OMLX_BASE_URL="http://${OMLX_HOST}:${PORT}/v1"
 fi
 
+# Run the model refresher 
 setpriv --reuid="$USERNAME" --regid="$USERNAME" --init-groups \
     opencode-refresh-models "$OPENCODE_CONFIG"
-
-export HOME="/home/${USERNAME}"
-export USER="$USERNAME"
-export LOGNAME="$USERNAME"
-export SHELL=/bin/bash
-export PIXI_HOME
 
 # Act differently depending on whether
 # a) We gave a direct command to entrypoint.sh
