@@ -9,4 +9,4 @@ cp -RL "$HOME/.config/nvim" nvim_config
 cp -RL "$HOME/.config/tmux" tmux_config 
 cp -RL "$HOME/.vim/"  vim
 
-container build --platform linux/arm64 -t debian-apple-juacrumar
+container build --platform linux/arm64 -t debian-apple-juacrumar "$@"

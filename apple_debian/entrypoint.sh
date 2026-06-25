@@ -5,8 +5,10 @@ USERNAME="${USERNAME:-juacrumar}"
 STATE_VOLUME="${STATE_VOLUME:-/state_volume}"
 PIXI_VOLUME="${PIXI_VOLUME:-/pixi_volume}"
 PIXI_HOME="${PIXI_HOME:-${PIXI_VOLUME}/dot_pixi}"
+PI_CODING_AGENT_DIR="${PI_CODING_AGENT_DIR:-${STATE_VOLUME}/pi/agent}"
 PORT="${PORT:-11311}"
 OPENCODE_CONFIG="${STATE_VOLUME}/opencode/config/opencode/opencode.json"
+PI_MODELS="${PI_CODING_AGENT_DIR}/models.json"
 WORKDIR="$PWD"
 
 # And set some environment variables
@@ -15,6 +17,7 @@ export USER="$USERNAME"
 export LOGNAME="$USERNAME"
 export SHELL=/bin/bash
 export PIXI_HOME
+export PI_CODING_AGENT_DIR
 
 # Check we have the volumes we need:
 for volume in "$STATE_VOLUME" "$PIXI_VOLUME"; do
@@ -28,6 +31,7 @@ done
 # Create the necessary directories to hold the state of the different tools, with permission for $USERNAME
 install -d "${STATE_VOLUME}/codex" -o $USERNAME -g $USERNAME
 install -d "$PIXI_HOME" "${PIXI_VOLUME}/repository_environments" -o $USERNAME -g $USERNAME
+install -d "$PI_CODING_AGENT_DIR" -o $USERNAME -g $USERNAME
 
 # In some cases the tools use XDG directories, which in the container are links to the volume
 install -o $USERNAME -g $USERNAME -d "${STATE_VOLUME}/opencode/config/opencode" \
@@ -49,6 +53,8 @@ fi
 # Run the model refresher 
 setpriv --reuid="$USERNAME" --regid="$USERNAME" --init-groups \
     opencode-refresh-models "$OPENCODE_CONFIG"
+setpriv --reuid="$USERNAME" --regid="$USERNAME" --init-groups \
+    pi-refresh-models "$PI_MODELS"
 
 # Act differently depending on whether
 # a) We gave a direct command to entrypoint.sh

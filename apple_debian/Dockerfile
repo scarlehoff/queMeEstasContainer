@@ -2,11 +2,13 @@ FROM debian:trixie-slim
 
 # Variables and arguments necessary at build time
 ARG NVIM_URL=https://github.com/neovim/neovim/releases/latest/download/nvim-linux-arm64.tar.gz
+ARG NODE_DIST_BASE=https://nodejs.org/dist/latest
 ARG USERNAME=juacrumar
 ARG STATE_VOLUME=/state_volume
 ARG PIXI_VOLUME=/pixi_volume
 ARG NNPDF_DATA=/nnpdf_data
 
+# Pass some as environment variables
 ENV USERNAME=${USERNAME}
 ENV STATE_VOLUME=${STATE_VOLUME}
 ENV PIXI_VOLUME=${PIXI_VOLUME}
@@ -27,8 +29,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     imagemagick \
     jq \
     less \
-    nodejs \
-    npm \
     openssh-client \
     procps \
     poppler-utils \
@@ -43,6 +43,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tree-sitter-cli \
     vim-tiny \
     unzip \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 ## Download and install packages not available in APT
@@ -52,8 +53,28 @@ RUN curl -L "$NVIM_URL" -o /tmp/nvim.tar.gz \
     && ln -s /opt/nvim-linux-arm64/bin/nvim /usr/local/bin/nvim \
     && rm /tmp/nvim.tar.gz
 
-# codex & opencode
-RUN npm install -g @openai/codex opencode-ai
+# node
+RUN set -e; \
+    mkdir -p /tmp/node-install; \
+    curl -fsSL "${NODE_DIST_BASE}/SHASUMS256.txt" -o /tmp/node-install/SHASUMS256.txt; \
+    node_file="$(awk '/node-v.*-linux-arm64.tar.xz$/ { print $2; exit }' /tmp/node-install/SHASUMS256.txt)"; \
+    test -n "$node_file"; \
+    curl -fsSL "${NODE_DIST_BASE}/${node_file}" -o "/tmp/node-install/${node_file}"; \
+    awk -v file="$node_file" '$2 == file { print }' /tmp/node-install/SHASUMS256.txt > /tmp/node-install/SHASUMS256.selected; \
+    (cd /tmp/node-install && sha256sum -c SHASUMS256.selected); \
+    tar -xJf "/tmp/node-install/${node_file}" -C /opt; \
+    mv "/opt/${node_file%.tar.xz}" /opt/node; \
+    ln -sf /opt/node/bin/node /usr/local/bin/node; \
+    ln -sf /opt/node/bin/npm /usr/local/bin/npm; \
+    ln -sf /opt/node/bin/npx /usr/local/bin/npx; \
+    rm -rf /tmp/node-install
+
+# codex, opencode & pi
+RUN npm install -g @openai/codex opencode-ai \
+    && npm install -g --ignore-scripts --min-release-age=0 @earendil-works/pi-coding-agent \
+    && ln -sf /opt/node/bin/codex /usr/local/bin/codex \
+    && ln -sf /opt/node/bin/opencode /usr/local/bin/opencode \
+    && ln -sf /opt/node/bin/pi /usr/local/bin/pi
 
 # pixi
 RUN export PIXI_HOME=/opt/pixi \
@@ -65,7 +86,8 @@ RUN useradd -U -m -s /bin/bash $USERNAME \
     && install -d -o $USERNAME -g $USERNAME "/home/${USERNAME}/.config" \
                 "/home/${USERNAME}/.local/share" \
                 "/home/${USERNAME}/.local/state" \
-                "/home/${USERNAME}/.cache"
+                "/home/${USERNAME}/.cache" \
+                "/home/${USERNAME}/.pi"
 
 ## Set up the configuration for each tool
 
@@ -94,10 +116,12 @@ RUN install -d -o $USERNAME -g $USERNAME ${NNPDF_DATA}
 # in addition, we need to copy two configuration files
 COPY ./config_files/opencode.json /usr/local/share/opencode/opencode.json
 COPY ./config_files/opencode-refresh-models.js /usr/local/bin/opencode-refresh-models
+COPY ./config_files/pi-refresh-models.js /usr/local/bin/pi-refresh-models
 RUN ln -s ${STATE_VOLUME}/opencode/config/opencode "/home/${USERNAME}/.config/opencode" \
  && ln -s ${STATE_VOLUME}/opencode/share/opencode "/home/${USERNAME}/.local/share/opencode" \
  && ln -s ${STATE_VOLUME}/opencode/cache/opencode "/home/${USERNAME}/.cache/opencode" \
- && chmod +x /usr/local/bin/opencode-refresh-models
+ && ln -s ${STATE_VOLUME}/pi/agent "/home/${USERNAME}/.pi/agent" \
+ && chmod +x /usr/local/bin/opencode-refresh-models /usr/local/bin/pi-refresh-models
 
 # Make sure permissions are ok
 RUN chown -R "${USERNAME}:${USERNAME}" "/home/${USERNAME}" ${NNPDF_DATA}
@@ -111,6 +135,9 @@ ENV CODEX_HOME=${STATE_VOLUME}/codex
 
 # pixi does something similar
 ENV PIXI_HOME=${PIXI_VOLUME}/dot_pixi
+
+# pi keeps settings and sessions under this directory
+ENV PI_CODING_AGENT_DIR=${STATE_VOLUME}/pi/agent
 
 ENV HOME=/home/$USERNAME
 ENV XDG_CONFIG_HOME=/home/$USERNAME/.config
